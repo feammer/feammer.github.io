@@ -19,8 +19,8 @@
     <meta name="description" content="题目123456789101112131415161718192021&lt;html&gt;	&lt;title&gt;asdf&lt;&#x2F;title&gt;	&lt;?php		error_reporting(0);		if(!$_GET[file])		&amp;#123;			echo &amp;#x27;&lt;a href&#x3D;&quot;.&#x2F;index.php?file&#x3D;show.php&quot;&amp;gt">
 <meta property="og:type" content="article">
 <meta property="og:title" content="php 本地文件包含漏洞(LFI)">
-<meta property="og:url" content="https://feammer.github.io/2021/11/19/LFI%E6%BC%8F%E6%B4%9E_include_require/index.html">
-<meta property="og:site_name" content="Hexo">
+<meta property="og:url" content="https://blog.feammer.top/2021/11/19/LFI%E6%BC%8F%E6%B4%9E_include_require/index.html">
+<meta property="og:site_name" content="feammer的小屋">
 <meta property="og:description" content="题目123456789101112131415161718192021&lt;html&gt;	&lt;title&gt;asdf&lt;&#x2F;title&gt;	&lt;?php		error_reporting(0);		if(!$_GET[file])		&amp;#123;			echo &amp;#x27;&lt;a href&#x3D;&quot;.&#x2F;index.php?file&#x3D;show.php&quot;&amp;gt">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2021-11-18T16:00:00.000Z">
@@ -30,7 +30,7 @@
 <meta name="twitter:card" content="summary_large_image">
   
   
-  <title>php 本地文件包含漏洞(LFI) - Hexo</title>
+  <title>php 本地文件包含漏洞(LFI) - feammer的小屋</title>
 
   <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/css/bootstrap.min.css" />
 
@@ -67,7 +67,7 @@
 
   <script id="fluid-configs">
     var Fluid = window.Fluid || {};
-    var CONFIG = {"hostname":"feammer.github.io","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":50,"cursorChar":"_","loop":false},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"copy_btn":true,"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+    var CONFIG = {"hostname":"blog.feammer.top","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":50,"cursorChar":"_","loop":false},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"copy_btn":true,"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
   </script>
   <script  src="/js/utils.js" ></script>
   <script  src="/js/color-schema.js" ></script>
@@ -238,7 +238,7 @@
             <h1 style="display: none">php 本地文件包含漏洞(LFI)</h1>
             
             <div class="markdown-body">
-              <h2 id="题目"><a href="#题目" class="headerlink" title="题目"></a>题目</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><div class="code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></div></td><td class="code"><pre><code class="hljs php+HTML">&lt;html&gt;<br>	&lt;title&gt;asdf&lt;/title&gt;<br>	&lt;?php<br>		error_reporting(0);<br>		if(!$_GET[file])<br>		&#123;<br>			echo &#x27;&lt;a href=&quot;./index.php?file=show.php&quot;&gt;click me? no&lt;/a&gt;&#x27;;<br>		&#125;<br>		$file=$_GET[&#x27;file&#x27;];<br>		if( strstr($file,&quot;../&quot;   ) ||<br>			stristr($file,&quot;tp&quot;   ) ||<br>			stristr($file,&quot;input&quot;) ||<br>			stristr($file,&quot;data&quot;)    )<br>		&#123;<br>			echo &quot;Oh no!&quot;;<br>			exit();<br>		&#125;<br>		include($file);<br>		//flag:nctf&#123;edulcni_elif_lacol_si_siht&#125;<br>	?&gt;<br>&lt;/html&gt;<br></code></pre></td></tr></table></figure>
+              <h2 id="题目"><a href="#题目" class="headerlink" title="题目"></a>题目</h2><figure class="highlight plaintext"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs php+HTML">&lt;html&gt;<br>	&lt;title&gt;asdf&lt;/title&gt;<br>	&lt;?php<br>		error_reporting(0);<br>		if(!$_GET[file])<br>		&#123;<br>			echo &#x27;&lt;a href=&quot;./index.php?file=show.php&quot;&gt;click me? no&lt;/a&gt;&#x27;;<br>		&#125;<br>		$file=$_GET[&#x27;file&#x27;];<br>		if( strstr($file,&quot;../&quot;   ) ||<br>			stristr($file,&quot;tp&quot;   ) ||<br>			stristr($file,&quot;input&quot;) ||<br>			stristr($file,&quot;data&quot;)    )<br>		&#123;<br>			echo &quot;Oh no!&quot;;<br>			exit();<br>		&#125;<br>		include($file);<br>		//flag:nctf&#123;edulcni_elif_lacol_si_siht&#125;<br>	?&gt;<br>&lt;/html&gt;<br></code></pre></div></td></tr></table></figure>
 
 <h2 id="题解"><a href="#题解" class="headerlink" title="题解"></a>题解</h2>
             </div>
