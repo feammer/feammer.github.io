@@ -1,0 +1,514 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/favicon.png">
+  <link rel="icon" href="/img/favicon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="feammer">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="1.注意服务器应当先配置好LAMP环境 下载unzip工具 1apt install unzip  2.Aria2的安装与RPC的部署Aria2的安装连接ECS服务器终端，键入 1234apt updateapt dist-upgradeapt-get install aria2aria2c -v #检查aria2c是否正确安装  RPC的部署配置文件：aria.conf,aria2.sessio">
+<meta property="og:type" content="article">
+<meta property="og:title" content="阿里云ECS服务器上部署下载器Aria2+AriaNg">
+<meta property="og:url" content="https://feammer.github.io/2021/02/09/%E9%98%BF%E9%87%8C%E4%BA%91ECS%E6%9C%8D%E5%8A%A1%E5%99%A8%E4%B8%8A%E9%83%A8%E7%BD%B2%E4%B8%8B%E8%BD%BD%E5%99%A8Aria2+AriaNg/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="1.注意服务器应当先配置好LAMP环境 下载unzip工具 1apt install unzip  2.Aria2的安装与RPC的部署Aria2的安装连接ECS服务器终端，键入 1234apt updateapt dist-upgradeapt-get install aria2aria2c -v #检查aria2c是否正确安装  RPC的部署配置文件：aria.conf,aria2.sessio">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-02-08T16:00:00.000Z">
+<meta property="article:modified_time" content="2022-04-15T07:26:33.069Z">
+<meta property="article:author" content="feammer">
+<meta property="article:tag" content="server, aria2">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  <title>阿里云ECS服务器上部署下载器Aria2+AriaNg - Hexo</title>
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/css/bootstrap.min.css" />
+
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@4/github-markdown.min.css" />
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hint.css@2/hint.min.css" />
+
+  
+    
+    
+      
+      <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@10/styles/github-gist.min.css" />
+    
+  
+
+  
+    <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.css" />
+  
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_ba1fz6golrf.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+<!-- 自定义样式保持在最底部 -->
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    var CONFIG = {"hostname":"feammer.github.io","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":50,"cursorChar":"_","loop":false},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"copy_btn":true,"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+<meta name="generator" content="Hexo 6.1.0"></head>
+
+
+<body>
+  <header style="height: 70vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>feammer 的小屋</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                标签
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div class="banner" id="banner" parallax=true
+         style="background: url('/img/post.png') no-repeat center center;
+           background-size: cover;">
+      <div class="full-bg-img">
+        <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+          <div class="page-header text-center fade-in-up">
+            <span class="h2" id="subtitle" title="阿里云ECS服务器上部署下载器Aria2+AriaNg">
+              
+            </span>
+
+            
+              <div class="mt-3">
+  
+  
+    <span class="post-meta">
+      <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+      <time datetime="2021-02-09 00:00" pubdate>
+        2021年2月9日 凌晨
+      </time>
+    </span>
+  
+</div>
+
+<div class="mt-1">
+  
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-chart"></i>
+      4.2k 字
+    </span>
+  
+
+  
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-clock-fill"></i>
+      
+      
+      35 分钟
+    </span>
+  
+
+  
+  
+</div>
+
+            
+          </div>
+
+          
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="d-none d-lg-block col-lg-2"></div>
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div class="py-5" id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">阿里云ECS服务器上部署下载器Aria2+AriaNg</h1>
+            
+            <div class="markdown-body">
+              <h2 id="1-注意"><a href="#1-注意" class="headerlink" title="1.注意"></a>1.注意</h2><p>服务器应当先配置好LAMP环境</p>
+<p>下载unzip工具</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><div class="code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><pre><code class="hljs bash">apt install unzip<br></code></pre></td></tr></table></figure>
+
+<h2 id="2-Aria2的安装与RPC的部署"><a href="#2-Aria2的安装与RPC的部署" class="headerlink" title="2.Aria2的安装与RPC的部署"></a>2.Aria2的安装与RPC的部署</h2><h3 id="Aria2的安装"><a href="#Aria2的安装" class="headerlink" title="Aria2的安装"></a>Aria2的安装</h3><p>连接ECS服务器终端，键入</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs bash">apt update<br>apt dist-upgrade<br>apt-get install aria2<br>aria2c -v <span class="hljs-comment">#检查aria2c是否正确安装</span><br></code></pre></td></tr></table></figure>
+
+<h3 id="RPC的部署"><a href="#RPC的部署" class="headerlink" title="RPC的部署"></a>RPC的部署</h3><p>配置文件：aria.conf,aria2.session</p>
+<p>配置目录：aria2c默认下载目录&#x2F;data&#x2F;aria2&#x2F;Downloads&#x2F;和上述两个文件存放目录&#x2F;data&#x2F;aria2&#x2F;</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-built_in">mkdir</span> -p /data/aria2/Downloads/ <span class="hljs-comment">#创建目录</span><br><span class="hljs-built_in">touch</span> /data/aria2/aria2.&#123;conf,session&#125;<br></code></pre></td></tr></table></figure>
+
+<p>在aria2.conf中写入以下内容</p>
+<p><strong>注意：Line68: rpc-secret&#x3D;<TOKEN>中的<TOKEN>应当改为要设置的RPC密码</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment">#允许rpc  </span><br>enable-rpc=<span class="hljs-literal">true</span>  <br><span class="hljs-comment">#允许所有来源, web界面跨域权限需要  </span><br>rpc-allow-origin-all=<span class="hljs-literal">true</span>  <br><span class="hljs-comment">#允许非外部访问  </span><br>rpc-listen-all=<span class="hljs-literal">true</span><br><span class="hljs-comment">## &#x27;#&#x27;开头为注释内容, 选项都有相应的注释说明, 根据需要修改 ##</span><br><span class="hljs-comment">## 被注释的选项填写的是默认值, 建议在需要修改时再取消注释  ##</span><br> <br><span class="hljs-comment">## 文件保存相关 ##</span><br> <br><span class="hljs-comment"># 文件的保存路径(可使用绝对路径或相对路径), 默认: 当前启动位置</span><br><span class="hljs-built_in">dir</span>=/data/aria2/Downloads<br><span class="hljs-comment"># 启用磁盘缓存, 0为禁用缓存, 需1.16以上版本, 默认:16M</span><br><span class="hljs-comment">#disk-cache=32M</span><br><span class="hljs-comment"># 文件预分配方式, 能有效降低磁盘碎片, 默认:prealloc</span><br><span class="hljs-comment"># 预分配所需时间: none &lt; falloc ? trunc &lt; prealloc</span><br><span class="hljs-comment"># falloc和trunc则需要文件系统和内核支持</span><br><span class="hljs-comment"># NTFS建议使用falloc, EXT3/4建议trunc, MAC 下需要注释此项</span><br><span class="hljs-comment">#file-allocation=none</span><br><span class="hljs-comment"># 断点续传</span><br><span class="hljs-built_in">continue</span>=<span class="hljs-literal">true</span><br> <br><span class="hljs-comment">## 下载连接相关 ##</span><br> <br><span class="hljs-comment"># 最大同时下载任务数, 运行时可修改, 默认:5</span><br>max-concurrent-downloads=3<br><span class="hljs-comment"># 同一服务器连接数, 添加时可指定, 默认:1</span><br>max-connection-per-server=5<br><span class="hljs-comment"># 最小文件分片大小, 添加时可指定, 取值范围1M -1024M, 默认:20M</span><br><span class="hljs-comment"># 假定size=10M, 文件为20MiB 则使用两个来源下载; 文件为15MiB 则使用一个来源下载</span><br>min-split-size=10M<br><span class="hljs-comment"># 单个任务最大线程数, 添加时可指定, 默认:5</span><br><span class="hljs-comment">#split=5</span><br><span class="hljs-comment"># 整体下载速度限制, 运行时可修改, 默认:0</span><br><span class="hljs-comment">#max-overall-download-limit=0</span><br><span class="hljs-comment"># 单个任务下载速度限制, 默认:0</span><br><span class="hljs-comment">#max-download-limit=0</span><br><span class="hljs-comment"># 整体上传速度限制, 运行时可修改, 默认:0</span><br><span class="hljs-comment">#max-overall-upload-limit=0</span><br><span class="hljs-comment"># 单个任务上传速度限制, 默认:0</span><br><span class="hljs-comment">#max-upload-limit=0</span><br><span class="hljs-comment"># 禁用IPv6, 默认:false</span><br>disable-ipv6=<span class="hljs-literal">true</span><br><span class="hljs-comment"># 连接超时时间, 默认:60</span><br><span class="hljs-comment">#timeout=60</span><br><span class="hljs-comment"># 最大重试次数, 设置为0表示不限制重试次数, 默认:5</span><br><span class="hljs-comment">#max-tries=5</span><br><span class="hljs-comment"># 设置重试等待的秒数, 默认:0</span><br><span class="hljs-comment">#retry-wait=0</span><br> <br><span class="hljs-comment">## 进度保存相关 ##</span><br> <br><span class="hljs-comment"># 从会话文件中读取下载任务</span><br>input-file=/data/aria2/aria2.session<br><span class="hljs-comment"># 在Aria2退出时保存`错误/未完成`的下载任务到会话文件</span><br>save-session=/etc/aria2/aria2.session<br><span class="hljs-comment"># 定时保存会话, 0为退出时才保存, 需1.16.1以上版本, 默认:0</span><br>save-session-interval=60<br> <br><span class="hljs-comment">## RPC相关设置 ##</span><br> <br><span class="hljs-comment"># 启用RPC, 默认:false</span><br>enable-rpc=<span class="hljs-literal">true</span><br><span class="hljs-comment"># 允许所有来源, 默认:false</span><br>rpc-allow-origin-all=<span class="hljs-literal">true</span><br><span class="hljs-comment"># 允许非外部访问, 默认:false</span><br>rpc-listen-all=<span class="hljs-literal">true</span><br><span class="hljs-comment"># 事件轮询方式, 取值:[epoll, kqueue, port, poll, select], 不同系统默认值不同</span><br><span class="hljs-comment">#event-poll=select</span><br><span class="hljs-comment"># RPC监听端口, 端口被占用时可以修改, 默认:6800</span><br>rpc-listen-port=6800<br><span class="hljs-comment"># 设置的RPC授权令牌, v1.18.4新增功能, 取代 --rpc-user 和 --rpc-passwd 选项</span><br>rpc-secret=&lt;TOKEN&gt;<br><span class="hljs-comment"># 设置的RPC访问用户名, 此选项新版已废弃, 建议改用 --rpc-secret 选项</span><br><span class="hljs-comment">#rpc-user=&lt;USER&gt;</span><br><span class="hljs-comment"># 设置的RPC访问密码, 此选项新版已废弃, 建议改用 --rpc-secret 选项</span><br><span class="hljs-comment">#rpc-passwd=&lt;PASSWD&gt;</span><br><span class="hljs-comment"># 是否启用 RPC 服务的 SSL/TLS 加密,</span><br><span class="hljs-comment"># 启用加密后 RPC 服务需要使用 https 或者 wss 协议连接</span><br><span class="hljs-comment">#rpc-secure=true</span><br><span class="hljs-comment"># 在 RPC 服务中启用 SSL/TLS 加密时的证书文件,</span><br><span class="hljs-comment"># 使用 PEM 格式时，您必须通过 --rpc-private-key 指定私钥</span><br><span class="hljs-comment">#rpc-certificate=/path/to/certificate.pem</span><br><span class="hljs-comment"># 在 RPC 服务中启用 SSL/TLS 加密时的私钥文件</span><br><span class="hljs-comment">#rpc-private-key=/path/to/certificate.key</span><br> <br><span class="hljs-comment">## BT/PT下载相关 ##</span><br> <br><span class="hljs-comment"># 当下载的是一个种子(以.torrent结尾)时, 自动开始BT任务, 默认:true</span><br><span class="hljs-comment">#follow-torrent=true</span><br><span class="hljs-comment"># BT监听端口, 当端口被屏蔽时使用, 默认:6881-6999</span><br>listen-port=51413<br><span class="hljs-comment"># 单个种子最大连接数, 默认:55</span><br><span class="hljs-comment">#bt-max-peers=55</span><br><span class="hljs-comment"># 打开DHT功能, PT需要禁用, 默认:true</span><br>enable-dht=<span class="hljs-literal">false</span><br><span class="hljs-comment"># 打开IPv6 DHT功能, PT需要禁用</span><br><span class="hljs-comment">#enable-dht6=false</span><br><span class="hljs-comment"># DHT网络监听端口, 默认:6881-6999</span><br><span class="hljs-comment">#dht-listen-port=6881-6999</span><br><span class="hljs-comment"># 本地节点查找, PT需要禁用, 默认:false</span><br><span class="hljs-comment">#bt-enable-lpd=false</span><br><span class="hljs-comment"># 种子交换, PT需要禁用, 默认:true</span><br>enable-peer-exchange=<span class="hljs-literal">false</span><br><span class="hljs-comment"># 每个种子限速, 对少种的PT很有用, 默认:50K</span><br><span class="hljs-comment">#bt-request-peer-speed-limit=50K</span><br><span class="hljs-comment"># 客户端伪装, PT需要</span><br>peer-id-prefix=-TR2770-<br>user-agent=Transmission/2.77<br>peer-agent=Transmission/2.77<br><span class="hljs-comment"># 当种子的分享率达到这个数时, 自动停止做种, 0为一直做种, 默认:1.0</span><br>seed-ratio=0<br><span class="hljs-comment"># 强制保存会话, 即使任务已经完成, 默认:false</span><br><span class="hljs-comment"># 较新的版本开启后会在任务完成后依然保留.aria2文件</span><br><span class="hljs-comment">#force-save=false</span><br><span class="hljs-comment"># BT校验相关, 默认:true</span><br><span class="hljs-comment">#bt-hash-check-seed=true</span><br><span class="hljs-comment"># 继续之前的BT任务时, 无需再次校验, 默认:false</span><br>bt-seed-unverified=<span class="hljs-literal">true</span><br><span class="hljs-comment"># 保存磁力链接元数据为种子文件(.torrent文件), 默认:false</span><br>bt-save-metadata=<span class="hljs-literal">true</span><br></code></pre></td></tr></table></figure>
+
+<h3 id="设置Aria2c开机自启动"><a href="#设置Aria2c开机自启动" class="headerlink" title="设置Aria2c开机自启动"></a>设置Aria2c开机自启动</h3><p>在系统默认自启动目录下注册aria2c服务：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">vim /lib/systemd/system/aria2c.service<br></code></pre></td></tr></table></figure>
+
+<p>按i，然后粘入如下内容：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs bash">[Unit]<br>Description=Aria2c<br> <br>[Service]<br>TimeoutStartSec=0<br>ExecStart=/usr/bin/aria2c --conf-path=/data/aria2/aria2.conf<br>ExecReload=/bin/kill -HUP <span class="hljs-variable">$MAINPID</span><br>KillMode=process<br>Restart=on-failure<br>RestartSec=42s<br> <br>[Install]<br>WantedBy=multi-user.target<br></code></pre></td></tr></table></figure>
+
+<p>按shift，输入wq，回车。然后启动aria2c服务并查看运行状态：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs bash">systemctl <span class="hljs-built_in">enable</span> aria2c<br>systemctl restart aria2c<br>systemctl status aria2c<br></code></pre></td></tr></table></figure>
+
+<p>如果输出的结果中含有“Active: active (running)”字样，则aria2c自启动服务注册成功。</p>
+<h2 id="3-AriaNg的安装与配置"><a href="#3-AriaNg的安装与配置" class="headerlink" title="3.AriaNg的安装与配置"></a>3.AriaNg的安装与配置</h2><p>在终端键入以下内容，具体版本号需查阅<a target="_blank" rel="noopener" href="https://github.com/mayswind/AriaNg/releases">Github release</a></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs bash">wget https://github.com/mayswind/AriaNg/releases/download/1.1.7/AriaNg-1.1.7.zip <span class="hljs-comment">#下载</span><br><span class="hljs-built_in">mkdir</span> /var/www/html/ariang <span class="hljs-comment">#创建ariang文件夹</span><br>unzip -d /var/www/html/ariang AriaNg-1.1.7.zip <span class="hljs-comment">#具体zip包名参考wget时的包名</span><br><span class="hljs-built_in">chmod</span> 755 /var/www/html/ariang<br></code></pre></td></tr></table></figure>
+
+<p>在浏览器访问http:&#x2F;&#x2F;&lt;IP地址&gt;&#x2F;ariang，确认配置成功</p>
+<p>在AriaNg设置-&gt;RPC设置中填写在rpc-secret中设置的密码。输完密码后刷新页面，如果左侧栏底部的Aria2状态显示为下图中的“<strong>已连接</strong>”则表明配置成功</p>
+
+            </div>
+            <hr>
+            <div>
+              <div class="post-metas mb-3">
+                
+                  <div class="post-meta mr-3">
+                    <i class="iconfont icon-category"></i>
+                    
+                      <a class="hover-with-bg" href="/categories/%E7%AC%94%E8%AE%B0/">笔记</a>
+                    
+                  </div>
+                
+                
+                  <div class="post-meta">
+                    <i class="iconfont icon-tags"></i>
+                    
+                      <a class="hover-with-bg" href="/tags/server-aria2/">server, aria2</a>
+                    
+                  </div>
+                
+              </div>
+              
+              
+                <div class="post-prevnext">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2021/03/07/%E5%9F%BA%E4%BA%8EKali%E7%9A%84aircrack-ng/">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">基于Kali的aircrack-ng</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+    
+      <div class="d-none d-lg-block col-lg-2 toc-container" id="toc-ctn">
+        <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+      </div>
+    
+  </div>
+</div>
+
+<!-- Custom -->
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v"
+                 for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+
+    
+  </main>
+
+  <footer class="text-center mt-5 py-3">
+  <div class="footer-content">
+     <p>到底啦</p> <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+  </div>
+  
+
+  
+
+  
+</footer>
+
+
+  <!-- SCRIPTS -->
+  
+  <script  src="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js" ></script>
+<script  src="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+<!-- Plugins -->
+
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+  
+
+
+
+  
+    <script  src="https://cdn.jsdelivr.net/npm/tocbot@4/dist/tocbot.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/anchor-js@4/anchor.min.js" ></script>
+  
+  
+    <script defer src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js" ></script>
+  
+
+
+
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/typed.js@2/lib/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var title = document.getElementById('subtitle').title;
+      
+        typing(title);
+      
+    })(window, document);
+  </script>
+
+
+
+
+
+  
+
+  
+    <!-- MathJax -->
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']]
+        },
+        loader: {
+          load: ['ui/lazy']
+        },
+        options: {
+          renderActions: {
+            findScript: [10, doc => {
+              document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+                const display = !!node.type.match(/; *mode=display/);
+                const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+                const text = document.createTextNode('');
+                node.parentNode.replaceChild(text, node);
+                math.start = { node: text, delim: '', n: 0 };
+                math.end = { node: text, delim: '', n: 0 };
+                doc.math.push(math);
+              });
+            }, '', false],
+            insertedScript: [200, () => {
+              document.querySelectorAll('mjx-container').forEach(node => {
+                let target = node.parentNode;
+                if (target.nodeName.toLowerCase() === 'li') {
+                  target.parentNode.classList.add('has-jax');
+                }
+              });
+            }, '', false]
+          }
+        }
+      };
+    </script>
+
+    <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" ></script>
+
+  
+
+
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js" ></script>
+  <script>
+    if (window.mermaid) {
+      mermaid.initialize({"theme":"default"});
+    }
+  </script>
+
+
+
+
+
+
+
+<!-- 主题的启动项 保持在最底部 -->
+<script  src="/js/boot.js" ></script>
+
+
+</body>
+</html>

