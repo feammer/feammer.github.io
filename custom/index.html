@@ -16,19 +16,38 @@
   <meta name="author" content="feammer">
   <meta name="keywords" content="">
   
-    <meta property="og:type" content="website">
-<meta property="og:title" content="标签 - web, php, misc, crypto, aes, paillier">
-<meta property="og:url" content="https://feammer.top/tags/web-php-misc-crypto-aes-paillier/index.html">
+    <meta name="description" content="function clickToCopy(obj) {     document.getElementById(obj.getAttribute(&quot;id&quot;)).select();     document.execCommand(&quot;Copy&quot;); }    MD5  function realTimeShow() {     var plainText &#x3D; document.getElement">
+<meta property="og:type" content="website">
+<meta property="og:title" content="工具箱">
+<meta property="og:url" content="https://feammer.top/custom/index.html">
 <meta property="og:site_name" content="feammer的小屋">
+<meta property="og:description" content="function clickToCopy(obj) {     document.getElementById(obj.getAttribute(&quot;id&quot;)).select();     document.execCommand(&quot;Copy&quot;); }    MD5  function realTimeShow() {     var plainText &#x3D; document.getElement">
 <meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2022-04-28T15:22:47.000Z">
+<meta property="article:modified_time" content="2022-04-30T06:34:44.546Z">
 <meta property="article:author" content="feammer">
 <meta name="twitter:card" content="summary_large_image">
   
   
-  <title>标签 - web, php, misc, crypto, aes, paillier - feammer的小屋</title>
+  <title>工具箱 - feammer的小屋</title>
 
   <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/css/bootstrap.min.css" />
 
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@4/github-markdown.min.css" />
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hint.css@2/hint.min.css" />
+
+  
+    
+    
+      
+      <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@10/styles/github-gist.min.css" />
+    
+  
+
+  
+    <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.css" />
+  
 
 
 <!-- 主题依赖的图标库，不要自行修改 -->
@@ -55,7 +74,7 @@
 
 
 <body>
-  <header style="height: 80vh;">
+  <header style="height: 60vh;">
     <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
   <div class="container">
     <a class="navbar-brand" href="/">
@@ -125,6 +144,18 @@
           
           
             <li class="nav-item">
+              <a class="nav-link" href="/custom/">
+                <i class="iconfont icon-briefcase"></i>
+                工具
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
               <a class="nav-link" href="/about/">
                 <i class="iconfont icon-user-fill"></i>
                 关于
@@ -151,22 +182,18 @@
 </nav>
 
     <div class="banner" id="banner" parallax=true
-         style="background: url('/img/tag.png') no-repeat center center;
+         style="background: url('/img/default.png') no-repeat center center;
            background-size: cover;">
       <div class="full-bg-img">
         <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
           <div class="page-header text-center fade-in-up">
-            <span class="h2" id="subtitle" title="标签 - web, php, misc, crypto, aes, paillier">
+            <span class="h2" id="subtitle" title="工具箱">
               
             </span>
 
             
           </div>
 
-          
-            <div class="scroll-down-bar">
-              <i class="iconfont icon-arrowdown"></i>
-            </div>
           
         </div>
       </div>
@@ -184,25 +211,47 @@
               <div class="col-12 col-md-10 m-auto">
                 
 
-<div class="list-group">
-  <p class="h4">共计 1 篇文章</p>
-  <hr>
+<article class="page-content">
+  <script>
+function clickToCopy(obj) {
+    document.getElementById(obj.getAttribute("id")).select();
+    document.execCommand("Copy");
+}
+</script>
+
+
+<h2 id="MD5"><a href="#MD5" class="headerlink" title="MD5"></a>MD5</h2><script src="../js/md5.js"></script>
+<script>
+function realTimeShow() {
+    var plainText = document.getElementById("input").value;
+    document.getElementById("32lower").value = md5(plainText);
+    document.getElementById("32upper").value = md5(plainText,'upper');
+    document.getElementById("16lower").value = md5(plainText,'16');
+    document.getElementById("16upper").value = md5(plainText,'16upper');
+}
+</script>
+<script type="text/stylesheet">
+input {
+    border: 1px solid #363636;
+    border-radius: 5px;
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.07);
+}
+</script>
+
+
+<table id="md5">
+<tr><th>输入</th><td><input id="input" onchange="realTimeShow()"/></td></tr>
+<tr><td>32位小写</td><td><input size=32 id="32lower" onclick="clickToCopy(this)" readonly /></td></tr>
+<tr><td>32位大写</td><td><input size=32 id="32upper" onclick="clickToCopy(this)" readonly /></td></tr>
+<tr><td>16位小写</td><td><input size=16 id="16lower" onclick="clickToCopy(this)" readonly /></td></tr>
+<tr><td>16位大写</td><td><input size=16 id="16upper" onclick="clickToCopy(this)" readonly /></td></tr>
+</table>
+
+
+<h2 id="SHA256"><a href="#SHA256" class="headerlink" title="SHA256"></a>SHA256</h2>
+
   
-  
-    
-      
-      <p class="h5">2022</p>
-    
-    <a href="/2022/04/03/CTF%E6%A0%A1%E8%B5%9BWriteUp/" class="list-group-item list-group-item-action">
-      <span class="archive-post-title">CTF 校赛 WriteUp</span>
-      <time style="float: right;">04-03</time>
-    </a>
-  
-</div>
-
-
-
-
+</article>
 
               </div>
             </div>
@@ -291,6 +340,19 @@
   
 
 
+
+  
+    <script  src="https://cdn.jsdelivr.net/npm/tocbot@4/dist/tocbot.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/anchor-js@4/anchor.min.js" ></script>
+  
+  
+    <script defer src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js" ></script>
+  
 
 
 

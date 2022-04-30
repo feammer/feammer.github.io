@@ -20,7 +20,17 @@
     
     <tags>
       
-      <tag>web, php, misc, crypto, aes, paillier</tag>
+      <tag>web</tag>
+      
+      <tag>php</tag>
+      
+      <tag>misc</tag>
+      
+      <tag>crypto</tag>
+      
+      <tag>aes</tag>
+      
+      <tag>paillier</tag>
       
     </tags>
     
@@ -45,7 +55,9 @@
     
     <tags>
       
-      <tag>web, php</tag>
+      <tag>web</tag>
+      
+      <tag>php</tag>
       
     </tags>
     
@@ -70,7 +82,9 @@
     
     <tags>
       
-      <tag>web, php</tag>
+      <tag>web</tag>
+      
+      <tag>php</tag>
       
     </tags>
     
@@ -120,7 +134,9 @@
     
     <tags>
       
-      <tag>web, php</tag>
+      <tag>web</tag>
+      
+      <tag>php</tag>
       
     </tags>
     
@@ -145,7 +161,11 @@
     
     <tags>
       
-      <tag>web, hash, php</tag>
+      <tag>web</tag>
+      
+      <tag>php</tag>
+      
+      <tag>hash</tag>
       
     </tags>
     
@@ -170,7 +190,9 @@
     
     <tags>
       
-      <tag>web, php</tag>
+      <tag>web</tag>
+      
+      <tag>php</tag>
       
     </tags>
     
@@ -220,7 +242,9 @@
     
     <tags>
       
-      <tag>server, aria2</tag>
+      <tag>server</tag>
+      
+      <tag>aria2</tag>
       
     </tags>
     
